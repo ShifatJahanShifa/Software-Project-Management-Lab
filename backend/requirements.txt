@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+google-generativeai
+pydantic-settings
+isort
+black
+python-dotenv
