@@ -12,5 +12,5 @@ async def root():
 
 @app.post("/generate", response_model=Response)
 def generate(request: Request):
-    response = generate_answer(request)
+    response = generate_answer(request.question)
     return Response(answer=response)

@@ -17,4 +17,4 @@ def generate_answer(question: str) -> str:
         response = model.generate_content(prompt)
         return response.text
     except Exception as e:
-        return f"LLM Error: {e}"
+        return f"cannot process your query right now. Try again later."
