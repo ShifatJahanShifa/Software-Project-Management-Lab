@@ -4,7 +4,6 @@ A modern, minimalistic chat application with a FastAPI backend and a frontend in
 
 ## Table of Contents
 
-- [Overview](#overview)
 - [Architecture](#architecture)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
@@ -13,9 +12,7 @@ A modern, minimalistic chat application with a FastAPI backend and a frontend in
 - [API Documentation](#api-documentation)
 - [Troubleshooting](#troubleshooting)
 
-## Overview
 
-This application is a full-stack chat assistant that provides an intelligent conversational interface. The backend uses FastAPI to serve a REST API that integrates with Google's Gemini AI model, while the frontend offers a clean, modern chat interface.
 
 ### Key Technologies
 
