@@ -3,8 +3,7 @@ def generate_prompt(question: str) -> str:
     Constructs the base prompt for the chatbot.
     """
     prompt = f"""
-    You are an intelligent, polite, and helpful assistant.
-    Always provide clear, concise, and useful answers to the questions.
+    Provide clear, concise, and useful answers to the question.
 
     Question: {question}
     Answer:

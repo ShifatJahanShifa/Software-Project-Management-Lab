@@ -21,6 +21,9 @@ else:
 genai.configure(api_key=api_key)
 model = genai.GenerativeModel("gemini-2.5-pro")
 
+messages = [
+    {"role": "system", "content": "You are a helpful assistant."}
+]
 
 def generate_answer(question: str) -> str:
     try:
@@ -28,7 +31,13 @@ def generate_answer(question: str) -> str:
             return "Error: GEMINI_API_KEY is not configured. Please create a .env file with your API key."
         
         prompt = generate_prompt(question)
-        response = model.generate_content(prompt)
+        messages.append({"role": "user", "content": prompt})
+        conversation_prompt = ""
+        for msg in messages:
+            role = msg["role"].capitalize()
+            conversation_prompt += f"{role}: {msg['content']}\n"
+        response = model.generate_content(conversation_prompt)
+        messages.append({"role": "assistant", "content": response.text})
         return response.text
     except Exception as e:
         error_msg = str(e)
