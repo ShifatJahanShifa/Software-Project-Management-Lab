@@ -7,11 +7,11 @@ from prompts import generate_prompt
 
 load_dotenv()
 
-# Set up logging
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Get API key
+
 api_key = os.getenv("GEMINI_API_KEY")
 if not api_key:
     logger.error("GEMINI_API_KEY not found in environment variables. Please check your .env file.")
@@ -42,7 +42,7 @@ def generate_answer(question: str) -> str:
     except Exception as e:
         error_msg = str(e)
         logger.error(f"Error generating answer: {error_msg}")
-        # Return more informative error message
+       
         if "API_KEY" in error_msg or "api key" in error_msg.lower():
             return f"API Key Error: {error_msg}. Please check your GEMINI_API_KEY in the .env file."
         elif "quota" in error_msg.lower() or "limit" in error_msg.lower():
