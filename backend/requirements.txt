@@ -5,3 +5,4 @@ pydantic-settings
 isort
 black
 python-dotenv
+mistralai
