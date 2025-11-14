@@ -1,7 +1,7 @@
 import logging
 import os
+from typing import Tuple
 
-import google.generativeai as genai
 from dotenv import load_dotenv
 from mistralai import Mistral
 
@@ -28,7 +28,7 @@ else:
 client = Mistral(api_key=api_key)
 
 
-def generate_answer(question: str) -> str:
+def generate_answer(question: str) -> Tuple[str, str]:
     try:
         if not api_key:
             return "Error: MISTRAL_API_KEY is not configured. Please create a .env file with your API key."

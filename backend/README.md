@@ -245,3 +245,14 @@ Common issues:
 - Port conflicts: Change port or kill existing process
 - CORS errors: Check CORS configuration
 
+### About generated temporary files
+Here is what tempfile.gettempdir() returns:
+```sh
+
+Windows: C:\Users\<you>\AppData\Local\Temp
+
+Linux: /tmp
+
+Mac: /var/folders/.../T
+```
+So, clean up your temporary folder according to your os.

@@ -28,7 +28,10 @@ async def root():
 
 @app.post("/generate")
 def generate(request: Request):
-    code, extension = generate_answer(request.question)
+    result = generate_answer(request.question)
+    if not isinstance(result, tuple):
+        return {"error": result}
+    code, extension = result
     temp_dir = tempfile.gettempdir()
     file_id = str(uuid.uuid4())
     filename = f"{file_id}.{extension}"
@@ -48,8 +51,13 @@ def generate(request: Request):
 @app.get("/download/{filename}")
 def download_file(filename: str):
     temp_dir = tempfile.gettempdir()
-    filepath = os.path.join(temp_dir, filename)
+    safe_filename = os.path.basename(filename)
+    filepath = os.path.join(temp_dir, safe_filename)
 
+    if os.path.commonpath([os.path.abspath(filepath), temp_dir]) != os.path.abspath(
+        temp_dir
+    ):
+        return {"error": "Invalid filename"}
     if not os.path.exists(filepath):
         return {"error": "File not found"}
 
