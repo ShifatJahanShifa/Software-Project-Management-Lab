@@ -52,7 +52,11 @@
         }
 
         const data = await response.json();
-        resultEl.textContent = `CodeBLEU Score: ${data.codebleu_score}`;
+        resultEl.textContent = "";
+
+        for (const [key, value] of Object.entries(data)) {
+            resultEl.textContent += `${key}: ${value}\n`;
+        }
       } catch (err) {
         resultEl.textContent = `Error: ${err.message}`;
       }

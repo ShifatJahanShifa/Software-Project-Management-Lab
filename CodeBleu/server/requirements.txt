@@ -1,3 +1,4 @@
 python-multipart 
-codebleu
+codebleu==0.6.1
 fastapi
+tree-sitter==0.20.1

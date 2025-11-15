@@ -6,9 +6,10 @@ EXT_LANG_MAP = {
     ".ts": "typescript",
     ".java": "java",
     ".c": "c",
-    ".cpp": "cpp"
+    ".cpp": "cpp",
 }
+
 
 def get_language_from_extension(filename: str) -> str:
     _, ext = os.path.splitext(filename)
-    return EXT_LANG_MAP.get(ext.lower(), "txt")  
+    return EXT_LANG_MAP.get(ext.lower(), "txt")
