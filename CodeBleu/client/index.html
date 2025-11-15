@@ -2,38 +2,581 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>CodeBLEU Score</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeBLEU Score Calculator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      background: #1e1e2e;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      border: 1px solid #2d2d44;
+      max-width: 900px;
+      width: 100%;
+      padding: 40px;
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h1 {
+      color: #e0e0e0;
+      margin-bottom: 10px;
+      font-size: 2.5em;
+      text-align: center;
+      background: linear-gradient(135deg, #7c8aff 0%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #b0b0b0;
+      margin-bottom: 30px;
+      font-size: 1.1em;
+    }
+
+    .upload-section {
+      margin-bottom: 30px;
+    }
+
+    .file-upload-group {
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #e0e0e0;
+      font-weight: 600;
+      font-size: 1.1em;
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      padding: 12px;
+      border: 2px dashed #7c8aff;
+      border-radius: 10px;
+      background: #2d2d44;
+      cursor: pointer;
+      font-size: 1em;
+      transition: all 0.3s ease;
+      color: #e0e0e0;
+    }
+
+    input[type="file"]:hover {
+      border-color: #a78bfa;
+      background: #353550;
+    }
+
+    .file-name {
+      margin-top: 8px;
+      color: #b0b0b0;
+      font-size: 0.9em;
+      font-style: italic;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #7c8aff 0%, #a78bfa 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.2em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(124, 138, 255, 0.4);
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(124, 138, 255, 0.6);
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .loading.active {
+      display: block;
+    }
+
+    .spinner {
+      border: 4px solid #2d2d44;
+      border-top: 4px solid #7c8aff;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .results-section {
+      display: none;
+      margin-top: 30px;
+      animation: slideIn 0.5s ease-out;
+    }
+
+    .results-section.active {
+      display: block;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .results-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .main-score {
+      font-size: 4em;
+      font-weight: bold;
+      background: linear-gradient(135deg, #7c8aff 0%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 10px 0;
+    }
+
+    .score-label {
+      color: #b0b0b0;
+      font-size: 1.2em;
+      margin-top: 10px;
+    }
+
+    .score-breakdown {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .score-card {
+      background: #2d2d44;
+      border-radius: 15px;
+      padding: 20px;
+      border: 2px solid #3d3d54;
+      transition: all 0.3s ease;
+    }
+
+    .score-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(124, 138, 255, 0.3);
+      border-color: #7c8aff;
+    }
+
+    .score-card-title {
+      color: #e0e0e0;
+      font-size: 0.9em;
+      font-weight: 600;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .score-value {
+      font-size: 2em;
+      font-weight: bold;
+      color: #7c8aff;
+      margin-bottom: 10px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #1a1a2e;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #7c8aff 0%, #a78bfa 100%);
+      border-radius: 10px;
+      transition: width 1s ease-out;
+      animation: fillProgress 1s ease-out;
+    }
+
+    @keyframes fillProgress {
+      from {
+        width: 0%;
+      }
+    }
+
+    .error-message {
+      display: none;
+      background: #3d1f1f;
+      border: 2px solid #5a2a2a;
+      color: #ff6b6b;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .error-message.active {
+      display: block;
+      animation: shake 0.5s;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+
+    .info-text {
+      text-align: center;
+      color: #888;
+      font-size: 0.9em;
+      margin-top: 20px;
+      font-style: italic;
+    }
+
+    .supported-languages {
+      background: #2d2d44;
+      border: 2px solid #3d3d54;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 25px;
+      text-align: center;
+    }
+
+    .supported-languages-title {
+      color: #7c8aff;
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 0.95em;
+    }
+
+    .language-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .language-tag {
+      background: #1a1a2e;
+      color: #7c8aff;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: 600;
+      border: 1px solid #7c8aff;
+    }
+
+    .file-name.invalid {
+      color: #ff6b6b;
+      font-weight: 600;
+    }
+
+    input[type="file"].invalid {
+      border-color: #ff6b6b;
+      background: #3d1f1f;
+    }
+
+    .file-name.valid {
+      color: #51cf66;
+      font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 2em;
+      }
+
+      .main-score {
+        font-size: 3em;
+      }
+
+      .score-breakdown {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h2>Upload Candidate and Reference Code Files</h2>
+  <div class="container">
+    <h1>CodeBLEU Score Calculator</h1>
+    <p class="subtitle">Compare your code against a reference implementation</p>
 
-  <form id="codeForm">
-    <label>Candidate Code File:</label>
-    <input type="file" id="candidate_file" name="candidate_file" required><br><br>
+    <div class="supported-languages">
+      <div class="supported-languages-title">Supported Programming Languages</div>
+      <div class="language-tags">
+        <span class="language-tag">Python (.py)</span>
+        <span class="language-tag">JavaScript (.js)</span>
+        <span class="language-tag">TypeScript (.ts)</span>
+        <span class="language-tag">Java (.java)</span>
+        <span class="language-tag">C (.c)</span>
+        <span class="language-tag">C++ (.cpp)</span>
+      </div>
+    </div>
 
-    <label>Reference Code File:</label>
-    <input type="file" id="reference_file" name="reference_file" required><br><br>
+    <form id="codeForm" class="upload-section">
+      <div class="file-upload-group">
+        <label for="candidate_file">Candidate Code File</label>
+        <div class="file-input-wrapper">
+          <input type="file" id="candidate_file" name="candidate_file" accept=".py,.js,.ts,.java,.cpp,.c" required>
+          <div class="file-name" id="candidate_file_name"></div>
+        </div>
+      </div>
 
-    <button type="submit">Compute CodeBLEU</button>
-  </form>
+      <div class="file-upload-group">
+        <label for="reference_file">Reference Code File</label>
+        <div class="file-input-wrapper">
+          <input type="file" id="reference_file" name="reference_file" accept=".py,.js,.ts,.java,.cpp,.c" required>
+          <div class="file-name" id="reference_file_name"></div>
+        </div>
+      </div>
 
-  <h3>Result:</h3>
-  <pre id="result"></pre>
+      <button type="submit" class="submit-btn" id="submitBtn">Compute CodeBLEU Score</button>
+    </form>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p style="margin-top: 15px; color: #b0b0b0;">Analyzing code similarity...</p>
+    </div>
+
+    <div class="error-message" id="errorMessage"></div>
+
+    <div class="results-section" id="resultsSection">
+      <div class="results-header">
+        <div class="score-label">Overall CodeBLEU Score</div>
+        <div class="main-score" id="mainScore">0.0000</div>
+      </div>
+
+      <div class="score-breakdown" id="scoreBreakdown">
+        <!-- Score cards will be inserted here -->
+      </div>
+
+      <p class="info-text">CodeBLEU scores range from 0 to 1, where 1 indicates perfect similarity</p>
+    </div>
+  </div>
 
   <script>
+    // Supported file extensions (must match server-side constants)
+    const SUPPORTED_EXTENSIONS = ['.py', '.js', '.ts', '.java', '.cpp', '.c'];
+    const EXTENSION_LABELS = {
+      '.py': 'Python',
+      '.js': 'JavaScript',
+      '.ts': 'TypeScript',
+      '.java': 'Java',
+      '.cpp': 'C++',
+      '.c': 'C'
+    };
+
     const form = document.getElementById("codeForm");
-    const resultEl = document.getElementById("result");
+    const submitBtn = document.getElementById("submitBtn");
+    const loading = document.getElementById("loading");
+    const errorMessage = document.getElementById("errorMessage");
+    const resultsSection = document.getElementById("resultsSection");
+    const mainScore = document.getElementById("mainScore");
+    const scoreBreakdown = document.getElementById("scoreBreakdown");
+    const candidateFileName = document.getElementById("candidate_file_name");
+    const referenceFileName = document.getElementById("reference_file_name");
+    const candidateFileInput = document.getElementById("candidate_file");
+    const referenceFileInput = document.getElementById("reference_file");
+
+    // Helper function to get file extension
+    function getFileExtension(filename) {
+      const lastDot = filename.lastIndexOf('.');
+      return lastDot !== -1 ? filename.substring(lastDot).toLowerCase() : '';
+    }
+
+    // Helper function to validate file extension
+    function isValidExtension(filename) {
+      const ext = getFileExtension(filename);
+      return SUPPORTED_EXTENSIONS.includes(ext);
+    }
+
+    // Helper function to get language name from extension
+    function getLanguageName(filename) {
+      const ext = getFileExtension(filename);
+      return EXTENSION_LABELS[ext] || ext.toUpperCase().substring(1);
+    }
+
+    // Validate and update file display
+    function validateFile(input, nameDisplay) {
+      if (input.files.length > 0) {
+        const file = input.files[0];
+        const ext = getFileExtension(file.name);
+        
+        if (isValidExtension(file.name)) {
+          // Valid file
+          input.classList.remove('invalid');
+          input.classList.add('valid');
+          nameDisplay.textContent = `✓ Selected: ${file.name} (${getLanguageName(file.name)})`;
+          nameDisplay.classList.remove('invalid');
+          nameDisplay.classList.add('valid');
+          return true;
+        } else {
+          // Invalid file
+          input.classList.remove('valid');
+          input.classList.add('invalid');
+          nameDisplay.textContent = `✗ Invalid file type: ${file.name}. Supported: ${SUPPORTED_EXTENSIONS.join(', ')}`;
+          nameDisplay.classList.remove('valid');
+          nameDisplay.classList.add('invalid');
+          // Clear the invalid file
+          input.value = '';
+          return false;
+        }
+      } else {
+        // No file selected
+        input.classList.remove('invalid', 'valid');
+        nameDisplay.textContent = "";
+        nameDisplay.classList.remove('invalid', 'valid');
+        return false;
+      }
+    }
+
+    // Update file names when files are selected
+    candidateFileInput.addEventListener("change", (e) => {
+      validateFile(e.target, candidateFileName);
+      // Also check if both files are valid before enabling submit
+      checkFormValidity();
+    });
+
+    referenceFileInput.addEventListener("change", (e) => {
+      validateFile(e.target, referenceFileName);
+      // Also check if both files are valid before enabling submit
+      checkFormValidity();
+    });
+
+    // Check if form is valid (both files selected and valid)
+    function checkFormValidity() {
+      const candidateFile = candidateFileInput.files[0];
+      const referenceFile = referenceFileInput.files[0];
+      
+      if (!candidateFile || !referenceFile) {
+        submitBtn.disabled = false; // Let form validation handle empty files
+        return false;
+      }
+
+      const candidateValid = isValidExtension(candidateFile.name);
+      const referenceValid = isValidExtension(referenceFile.name);
+
+      if (candidateValid && referenceValid) {
+        // Check if both files have the same extension
+        const candidateExt = getFileExtension(candidateFile.name);
+        const referenceExt = getFileExtension(referenceFile.name);
+        
+        if (candidateExt !== referenceExt) {
+          showError(`File types must match! Candidate is ${getLanguageName(candidateFile.name)} but reference is ${getLanguageName(referenceFile.name)}.`);
+          submitBtn.disabled = true;
+          return false;
+        } else {
+          hideError();
+          submitBtn.disabled = false;
+          return true;
+        }
+      } else {
+        submitBtn.disabled = true;
+        return false;
+      }
+    }
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const candidateFile = document.getElementById("candidate_file").files[0];
-      const referenceFile = document.getElementById("reference_file").files[0];
+      const candidateFile = candidateFileInput.files[0];
+      const referenceFile = referenceFileInput.files[0];
 
       if (!candidateFile || !referenceFile) {
-        alert("Please select both files!");
+        showError("Please select both files!");
         return;
       }
+
+      // Validate file extensions
+      if (!isValidExtension(candidateFile.name)) {
+        showError(`Invalid candidate file type. Supported extensions: ${SUPPORTED_EXTENSIONS.join(', ')}`);
+        return;
+      }
+
+      if (!isValidExtension(referenceFile.name)) {
+        showError(`Invalid reference file type. Supported extensions: ${SUPPORTED_EXTENSIONS.join(', ')}`);
+        return;
+      }
+
+      // Validate that both files have the same extension
+      const candidateExt = getFileExtension(candidateFile.name);
+      const referenceExt = getFileExtension(referenceFile.name);
+      
+      if (candidateExt !== referenceExt) {
+        showError(`File types must match! Candidate is ${getLanguageName(candidateFile.name)} but reference is ${getLanguageName(referenceFile.name)}.`);
+        return;
+      }
+
+      // Reset UI
+      hideError();
+      hideResults();
+      showLoading();
+      submitBtn.disabled = true;
 
       const formData = new FormData();
       formData.append("candidate_file", candidateFile);
@@ -47,20 +590,93 @@
 
         if (!response.ok) {
           const error = await response.json();
-          resultEl.textContent = `Error: ${error.detail}`;
+          showError(`Error: ${error.detail || "Failed to compute CodeBLEU score"}`);
           return;
         }
 
         const data = await response.json();
-        resultEl.textContent = "";
-
-        for (const [key, value] of Object.entries(data)) {
-            resultEl.textContent += `${key}: ${value}\n`;
-        }
+        displayResults(data);
       } catch (err) {
-        resultEl.textContent = `Error: ${err.message}`;
+        showError(`Network Error: ${err.message}. Please make sure the server is running on port 8001.`);
+      } finally {
+        hideLoading();
+        submitBtn.disabled = false;
       }
     });
+
+    function showLoading() {
+      loading.classList.add("active");
+    }
+
+    function hideLoading() {
+      loading.classList.remove("active");
+    }
+
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.classList.add("active");
+      hideResults();
+    }
+
+    function hideError() {
+      errorMessage.classList.remove("active");
+    }
+
+    function showResults() {
+      resultsSection.classList.add("active");
+    }
+
+    function hideResults() {
+      resultsSection.classList.remove("active");
+    }
+
+    function displayResults(data) {
+      hideError();
+      
+      // Extract scores from the response
+      // CodeBLEU typically returns: codebleu, ngram_match_score, weighted_ngram_match_score, syntax_match_score, dataflow_match_score
+      const codebleuScore = data.codebleu || data.CodeBLEU || 0;
+      const ngramScore = data.ngram_match_score || data.ngram_match || 0;
+      const weightedNgramScore = data.weighted_ngram_match_score || data.weighted_ngram_match || 0;
+      const syntaxScore = data.syntax_match_score || data.syntax_match || 0;
+      const dataflowScore = data.dataflow_match_score || data.dataflow_match || 0;
+
+      // Update main score
+      mainScore.textContent = codebleuScore.toFixed(4);
+
+      // Create score breakdown
+      const scores = [
+        { name: "N-gram Match", value: ngramScore, key: "ngram_match_score" },
+        { name: "Weighted N-gram", value: weightedNgramScore, key: "weighted_ngram_match_score" },
+        { name: "Syntax Match", value: syntaxScore, key: "syntax_match_score" },
+        { name: "Dataflow Match", value: dataflowScore, key: "dataflow_match_score" }
+      ];
+
+      // Also include any other scores from the response
+      Object.keys(data).forEach(key => {
+        if (typeof data[key] === 'number' && 
+            !['codebleu', 'CodeBLEU', 'ngram_match_score', 'weighted_ngram_match_score', 
+              'syntax_match_score', 'dataflow_match_score', 'ngram_match', 
+              'weighted_ngram_match', 'syntax_match', 'dataflow_match'].includes(key)) {
+          scores.push({ name: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), value: data[key], key });
+        }
+      });
+
+      scoreBreakdown.innerHTML = scores.map(score => `
+        <div class="score-card">
+          <div class="score-card-title">${score.name}</div>
+          <div class="score-value">${score.value.toFixed(4)}</div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${(score.value * 100).toFixed(1)}%"></div>
+          </div>
+        </div>
+      `).join('');
+
+      // Animate the main score
+      setTimeout(() => {
+        showResults();
+      }, 100);
+    }
   </script>
 </body>
 </html>

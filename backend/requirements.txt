@@ -6,3 +6,4 @@ isort
 black
 python-dotenv
 mistralai
+requests
