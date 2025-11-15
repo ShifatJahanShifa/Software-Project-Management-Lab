@@ -51,8 +51,21 @@ chatForm.addEventListener('submit', async (e) => {
         
         const data = await response.json();
         
-  
-        addMessage('assistant', data.answer);
+        let messageHTML;
+
+        if (data.download_url) {
+            const fullDownloadUrl = `${API_BASE_URL}${data.download_url}`;
+
+            messageHTML = `<a href="${fullDownloadUrl}" 
+                download="${data.filename}" 
+                class="download-btn">
+                Download ${data.filename}
+                </a>
+            `;
+        }
+
+        addMessage('assistant', messageHTML);
+
         
     } catch (error) {
         
@@ -68,26 +81,28 @@ chatForm.addEventListener('submit', async (e) => {
     }
 });
 
-
 function addMessage(type, content) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${type}`;
-    
+
     const contentDiv = document.createElement('div');
     contentDiv.className = 'message-content';
-    
-    const paragraph = document.createElement('p');
-    paragraph.textContent = content;
-    
-    contentDiv.appendChild(paragraph);
+
+    // If content contains HTML (button), insert directly
+    if (content.includes("<a") || content.includes("<button")) {
+        contentDiv.innerHTML = content;
+    } else {
+        const p = document.createElement('p');
+        p.textContent = content;
+        contentDiv.appendChild(p);
+    }
+
     messageDiv.appendChild(contentDiv);
     messagesContainer.appendChild(messageDiv);
-    
-
     scrollToBottom();
-    
     return messageDiv;
 }
+
 
 // Add a loading message
 function addLoadingMessage() {
