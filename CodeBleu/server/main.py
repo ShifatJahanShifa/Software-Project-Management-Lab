@@ -90,7 +90,6 @@ async def score(
             reference_list, candidate_list, lang=f"{language.strip()}", weights=weights
         )
     
-        print(result)
         return JSONResponse(content=result)
 
     except Exception as e:
