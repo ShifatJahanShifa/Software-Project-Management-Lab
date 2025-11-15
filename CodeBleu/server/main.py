@@ -89,10 +89,7 @@ async def score(
         result = calc_codebleu(
             reference_list, candidate_list, lang=f"{language.strip()}", weights=weights
         )
-        # if isinstance(result, dict):
-        #     main_score = result.get('codebleu', 0.0)
-        # else:
-        #     main_score = float(result)
+    
         print(result)
         return JSONResponse(content=result)
 
