@@ -2,11 +2,10 @@ import logging
 import os
 from typing import Tuple
 
-from dotenv import load_dotenv
-from mistralai import Mistral
-
 from constants import MODEL
+from dotenv import load_dotenv
 from extension_finder import detect_extension
+from mistralai import Mistral
 from prompts import generate_prompt
 from utils.code_cleaner import clean_code
 

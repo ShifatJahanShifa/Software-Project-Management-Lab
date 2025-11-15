@@ -5,7 +5,6 @@ import uuid
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-
 from llm_service import generate_answer
 from models import Request, Response
 
